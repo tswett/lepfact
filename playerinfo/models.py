@@ -43,10 +43,6 @@ class Transaction(models.Model):
 class Plot(models.Model):
     owner = models.ForeignKey(User)
 
-class Factory(models.Model):
-    plot = models.OneToOneField(Plot)
-    factory_type = models.ForeignKey(FactoryType)
-
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
     build_cost = models.ManyToManyField(Currency, through='BuildCostData')
@@ -54,6 +50,10 @@ class FactoryType(models.Model):
     idle_upkeep = models.ManyToManyField(Currency, through='IdleUpkeepData')
     active_upkeep = models.ManyToManyField(Currency, through='ActiveUpkeepData')
     yield_ = models.ManyToManyField(Currency, through='YieldData')
+
+class Factory(models.Model):
+    plot = models.OneToOneField(Plot)
+    factory_type = models.ForeignKey(FactoryType)
 
 class FactoryCostData(models.Model):
     amount = PositiveIntegerField()
