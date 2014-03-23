@@ -56,7 +56,7 @@ class Factory(models.Model):
     factory_type = models.ForeignKey(FactoryType)
 
 class FactoryCostData(models.Model):
-    amount = PositiveIntegerField()
+    amount = models.PositiveIntegerField()
 
     class Meta:
         abstract = True
