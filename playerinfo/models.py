@@ -45,11 +45,11 @@ class Plot(models.Model):
 
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
-    build_cost = models.ManyToManyField(Currency, through='BuildCostData')
-    startup_cost = models.ManyToManyField(Currency, through='StartupCostData')
-    idle_upkeep = models.ManyToManyField(Currency, through='IdleUpkeepData')
-    active_upkeep = models.ManyToManyField(Currency, through='ActiveUpkeepData')
-    yield_ = models.ManyToManyField(Currency, through='YieldData')
+    build_cost = models.ManyToManyField(Currency, through='BuildCostData', related_name='buildcost_factorytype_set')
+    startup_cost = models.ManyToManyField(Currency, through='StartupCostData', related_name='startupcost_factorytype_set')
+    idle_upkeep = models.ManyToManyField(Currency, through='IdleUpkeepData', related_name='idleupkeep_factorytype_set')
+    active_upkeep = models.ManyToManyField(Currency, through='ActiveUpkeepData', related_name='activeupkeep_factorytype_set')
+    yield_ = models.ManyToManyField(Currency, through='YieldData', related_name='yield_factorytype_set')
 
 class Factory(models.Model):
     plot = models.OneToOneField(Plot)
