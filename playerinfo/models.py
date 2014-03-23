@@ -51,6 +51,9 @@ class FactoryType(models.Model):
     active_upkeep = models.ManyToManyField(Currency, through='ActiveUpkeepData', related_name='activeupkeep_factorytype_set')
     yield_ = models.ManyToManyField(Currency, through='YieldData', related_name='yield_factorytype_set')
 
+    def __unicode__(self):
+        return "Factory type '" + self.name + "'"
+
 class Factory(models.Model):
     plot = models.OneToOneField(Plot)
     factory_type = models.ForeignKey(FactoryType)
