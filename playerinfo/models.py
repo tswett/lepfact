@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     unix_uid = models.BigIntegerField(null=True, blank=True, unique=True)
-    unix_username = models.CharField(max_length=32, null=True, blank=True, unique=True)
-    sql_username = models.CharField(max_length=32, null=True, blank=True, unique=True)
+    unix_username = models.CharField(max_length=32, null=True, blank=True, unique=False)
+    sql_username = models.CharField(max_length=32, null=True, blank=True, unique=False)
 
     def __unicode__(self):
         return "UserProfile for user '" + self.user.username + "'"
