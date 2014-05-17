@@ -23,7 +23,7 @@ class Currency(models.Model):
 class Account(models.Model):
     user = models.ForeignKey(User)
     currency = models.ForeignKey(Currency)
-    balance = models.BigIntegerField()
+    balance = models.BigIntegerField(default=0)
 
     class Meta:
         unique_together = ('user', 'currency')
