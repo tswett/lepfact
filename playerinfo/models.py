@@ -41,7 +41,8 @@ class Transaction(models.Model):
         return 'Transaction to credit ' + self.amount + ' units of currency "' + str(self.account.currency) + '" to user "' + self.account.user.username + '" at ' + self.date + ' with description: ' + self.description
 
 class Plot(models.Model):
-    owner = models.ForeignKey(User)
+    lessee = models.ForeignKey(User, null=True)
+    days_left = models.PositiveIntegerField(default=0)
 
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
@@ -57,6 +58,7 @@ class FactoryType(models.Model):
 class Factory(models.Model):
     plot = models.OneToOneField(Plot)
     factory_type = models.ForeignKey(FactoryType)
+    active = models.BooleanField(default=False)
 
 class FactoryCostData(models.Model):
     amount = models.PositiveIntegerField()
