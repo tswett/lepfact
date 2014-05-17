@@ -35,5 +35,15 @@
             </tr>
 {% endfor %}
         </table>
+
+        <h1>Factory types</h1>
+{% for factory in factory_types %}
+        <h2>{{ factory.name }}</h2>
+        <ul>
+{% for costtype in factory.costtypes %}
+            <li>{{ costtype.name }}: {% for cost in costtype.costs %}{{ cost.name }}: {{ cost.amount }}; {% endfor %}</li>
+{% endfor %}
+        </ul>
+{% endfor %}
     </body>
 </html>
