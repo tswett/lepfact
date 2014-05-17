@@ -80,3 +80,9 @@ class ActiveUpkeepData(FactoryCostData):
 
 class YieldData(FactoryCostData):
     pass
+
+class WorkDoneDay(models.Model):
+    # If a WorkDoneDay exists for a particular day, that means that the daily
+    # script has run for that day.
+
+    day = models.DateField()
