@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 import django.shortcuts
 
-from playerinfo.models import (Account, UserProfile, FactoryType,
-    BuildCostData, StartupCostData, IdleUpkeepData, ActiveUpkeepData, YieldData)
+from playerinfo.models import (
+    Account, UserProfile, Plot, FactoryType, BuildCostData, StartupCostData,
+    IdleUpkeepData, ActiveUpkeepData, YieldData
+)
 
 COST_CLASS = {
     'Build cost': BuildCostData,
@@ -16,6 +18,8 @@ def list_profiles(request):
     profiles = UserProfile.objects.all()
 
     accounts = Account.objects.all()
+
+    plots = Plot.objects.all()
 
     factory_types = []
 
@@ -46,6 +50,7 @@ def list_profiles(request):
     context = {
         'profiles': profiles,
         'accounts': accounts,
+        'plots': plots,
         'factory_types': factory_types,
     }
 

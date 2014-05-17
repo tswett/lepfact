@@ -1,5 +1,25 @@
 <html>
     <body>
+        <h1>Plots</h1>
+        <table>
+            <tr>
+                <th>Plot ID</th>
+                <th>Lessee</th>
+                <th>Days remaining</th>
+                <th>Factory type</th>
+                <th>Factory is active</th>
+            </tr>
+{% for plot in plots %}
+            <tr>
+                <td>{{ plot.id }}</td>
+                <td>{{ plot.lessee }}</td>
+                <td>{{ plot.days_left }}</td>
+                <td>{{ plot.factory.factory_type.name }}</td>
+                <td>{{ plot.factory.active }}</td>
+            </tr>
+{% endfor %}
+        </table>
+
         <h1>Players</h1>
         <table>
             <tr>
