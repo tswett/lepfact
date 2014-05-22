@@ -20,9 +20,16 @@ class Currency(models.Model):
     def __unicode__(self):
         return "Currency '" + self.name + "'"
 
+class InsufficientFundsError(Exception):
+    def __init__(self, account, balance, amount):
+        self.account = account
+        self.balance = balance
+        self.amount = amount
+
 class Account(models.Model):
     user = models.ForeignKey(User)
     currency = models.ForeignKey(Currency)
+    # positive balance is an asset of user, negative is a liability.
     balance = models.BigIntegerField(default=0)
 
     class Meta:
@@ -31,11 +38,29 @@ class Account(models.Model):
     def __unicode__(self):
         return 'Account of user "' + self.user.username + '" in currency "' + str(self.currency) + '"'
 
+    def credit_debit(self, amount, allow_negative=False, description=''):
+        # amount is positive for a credit, negative for a debit.
+
+        # If allow_negative is false, we don't want to allow debits resulting
+        # in a negative balance.  However, we do want to allow all credits.
+        if (not allow_negative) and amount < 0 and self.balance + amount < 0:
+            raise InsufficientFundsError(self, self.balance, amount)
+        else:
+            self.balance += amount
+            self.save()
+            
+            Transaction(self, amount, description).save()
+
 class Transaction(models.Model):
     account = models.ForeignKey(Account)
     amount = models.BigIntegerField() # positive for a credit, negative for a debit
     date = models.DateTimeField(auto_now = True)
     description = models.CharField(max_length=128)
+
+    def __init__(self, account, amount, description):
+        self.account = account
+        self.amount = amount
+        self.description = description
 
     def __unicode__(self):
         return 'Transaction to credit ' + self.amount + ' units of currency "' + str(self.account.currency) + '" to user "' + self.account.user.username + '" at ' + self.date + ' with description: ' + self.description
