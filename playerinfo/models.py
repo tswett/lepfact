@@ -38,6 +38,7 @@ class InsufficientFundsError(Exception):
     """
 
     def __init__(self, account, balance, amount):
+        super(InsufficientFundsError, self).__init__()
         self.account = account
         self.balance = balance
         self.amount = amount
@@ -78,6 +79,7 @@ class Transaction(models.Model):
     description = models.CharField(max_length=128)
 
     def __init__(self, account, amount, description):
+        super(Transaction, self).__init__()
         self.account = account
         self.amount = amount
         self.description = description
