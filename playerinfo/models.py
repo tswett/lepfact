@@ -57,7 +57,7 @@ class Account(models.Model):
         return ('Account of user "%s" in currency "%s"' %
             self.user.username, str(self.currency))
 
-    def credit_debit(self, amount, allow_negative=False, description=''):
+    def credit_or_debit(self, amount, allow_negative=False, description=''):
         # amount is positive for a credit, negative for a debit.
 
         # If allow_negative is false, we don't want to allow debits resulting
