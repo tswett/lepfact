@@ -3,15 +3,27 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
+    """This is some game-specific data about users or players."""
     user = models.OneToOneField(User)
     unix_uid = models.BigIntegerField(null=True, blank=True, unique=True)
-    unix_username = models.CharField(max_length=32, null=True, blank=True, unique=False)
-    sql_username = models.CharField(max_length=32, null=True, blank=True, unique=False)
+    unix_username = models.CharField(
+        max_length=32,
+        null=True,
+        blank=True,
+        unique=False,
+    )
+    sql_username = models.CharField(
+        max_length=32,
+        null=True,
+        blank=True,
+        unique=False
+    )
 
     def __unicode__(self):
         return "UserProfile for user '" + self.user.username + "'"
 
 class Currency(models.Model):
+    """This is a currency in the game."""
     name = models.CharField(max_length=32, unique=True)
 
     class Meta:
@@ -21,12 +33,17 @@ class Currency(models.Model):
         return "Currency '" + self.name + "'"
 
 class InsufficientFundsError(Exception):
+    """This is an exception thrown to indicate that an operation has
+    failed due to an insufficient account balance.
+    """
+
     def __init__(self, account, balance, amount):
         self.account = account
         self.balance = balance
         self.amount = amount
 
 class Account(models.Model):
+    """This is an account of some user in some currency."""
     user = models.ForeignKey(User)
     currency = models.ForeignKey(Currency)
     # positive balance is an asset of user, negative is a liability.
@@ -36,7 +53,8 @@ class Account(models.Model):
         unique_together = ('user', 'currency')
 
     def __unicode__(self):
-        return 'Account of user "' + self.user.username + '" in currency "' + str(self.currency) + '"'
+        return ('Account of user "%s" in currency "%s"' %
+            self.user.username, str(self.currency))
 
     def credit_debit(self, amount, allow_negative=False, description=''):
         # amount is positive for a credit, negative for a debit.
@@ -52,8 +70,10 @@ class Account(models.Model):
             Transaction(self, amount, description).save()
 
 class Transaction(models.Model):
+    """This is a record of a credit or debit to an account."""
     account = models.ForeignKey(Account)
-    amount = models.BigIntegerField() # positive for a credit, negative for a debit
+    # 'amount' is positive for a credit, negative for a debit
+    amount = models.BigIntegerField()
     date = models.DateTimeField(auto_now = True)
     description = models.CharField(max_length=128)
 
@@ -63,19 +83,46 @@ class Transaction(models.Model):
         self.description = description
 
     def __unicode__(self):
-        return 'Transaction to credit ' + self.amount + ' units of currency "' + str(self.account.currency) + '" to user "' + self.account.user.username + '" at ' + self.date + ' with description: ' + self.description
+        return (
+            'Transaction to credit %s units of currency "%s" to user "%s" at '
+            '%s with description: %s' %
+            self.amount, str(self.account.currency),
+            self.account.user.username, self.date, self.description
+        )
 
 class Plot(models.Model):
+    """This is an in-game plot of land on which something can be built."""
     lessee = models.ForeignKey(User, null=True)
     days_left = models.PositiveIntegerField(default=0)
 
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
-    build_cost = models.ManyToManyField(Currency, through='BuildCostData', related_name='buildcost_factorytype_set')
-    startup_cost = models.ManyToManyField(Currency, through='StartupCostData', related_name='startupcost_factorytype_set')
-    idle_upkeep = models.ManyToManyField(Currency, through='IdleUpkeepData', related_name='idleupkeep_factorytype_set')
-    active_upkeep = models.ManyToManyField(Currency, through='ActiveUpkeepData', related_name='activeupkeep_factorytype_set')
-    yield_ = models.ManyToManyField(Currency, through='YieldData', related_name='yield_factorytype_set')
+
+    build_cost = models.ManyToManyField(
+        Currency,
+        through='BuildCostData',
+        related_name='buildcost_factorytype_set',
+    )
+    startup_cost = models.ManyToManyField(
+        Currency,
+        through='StartupCostData',
+        related_name='startupcost_factorytype_set',
+    )
+    idle_upkeep = models.ManyToManyField(
+        Currency,
+        through='IdleUpkeepData',
+        related_name='idleupkeep_factorytype_set',
+    )
+    active_upkeep = models.ManyToManyField(
+        Currency,
+        through='ActiveUpkeepData',
+        related_name='activeupkeep_factorytype_set',
+    )
+    yield_ = models.ManyToManyField(
+        Currency,
+        through='YieldData',
+        related_name='yield_factorytype_set',
+    )
 
     def __unicode__(self):
         return "Factory type '" + self.name + "'"
@@ -109,7 +156,14 @@ class YieldData(FactoryCostData):
     pass
 
 class WorkDoneDay(models.Model):
-    # If a WorkDoneDay exists for a particular day, that means that the daily
-    # script has run for that day.
+    """This object represents the fact that the daily script has been
+    run for a particular day.
+
+    If a WorkDoneDay exists for a particular day, the script has already
+    been run; otherwise, it hasn't.  When the script is run, it checks
+    to make sure that a WorkDoneDay does not already exist for the
+    relevant day.  If it runs successfully, it creates a WorkDoneDay
+    for the relevant day.
+    """
 
     day = models.DateField()
