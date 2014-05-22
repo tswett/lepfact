@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.management.base import BaseCommand
-from playerinfo.models import WorkDoneDay
+from playerinfo.models import Factory, WorkDoneDay
 
 class Command(BaseCommand):
     args = '[timestamp]'
@@ -18,5 +18,8 @@ class Command(BaseCommand):
             return
 
         self.stdout.write('Running daily tasks for %s.' % the_date.strftime('%d %b %Y'))
+
+        for factory in Factory.objects.all():
+            factory.upkeep()
 
         WorkDoneDay(day=the_date).save()

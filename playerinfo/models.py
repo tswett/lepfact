@@ -1,3 +1,4 @@
+import django.db
 from django.db import models
 
 from django.contrib.auth.models import User
@@ -133,6 +134,47 @@ class Factory(models.Model):
     plot = models.OneToOneField(Plot)
     factory_type = models.ForeignKey(FactoryType)
     active = models.BooleanField(default=False)
+
+    def upkeep(self):
+        lessee = self.plot.lessee
+
+        if self.active:
+            try:
+                with django.db.transaction.atomic():
+                    upkeep = self.factory_type.activeupkeepdata_set.all()
+                    for upkeep_cost in upkeep:
+                        amount = upkeep_cost.amount
+                        currency = upkeep_cost.currency
+                        account, created = Account.objects.get_or_create(user=lessee, currency=currency)
+                        account.credit_or_debit(-amount)
+
+                    yields = self.factory_type.yielddata_set.all()
+                    for yield_ in yields:
+                        amount = yield_.amount
+                        currency = yield_.currency
+                        account, created = Account.objects.get_or_create(user=lessee, currency=currency)
+                        account.credit_or_debit(amount)
+
+                self.save()
+
+            except InsufficientFundsError:
+                self.active = False
+                self.upkeep()
+
+        else:
+            try:
+                with django.db.transaction.atomic():
+                    upkeep = self.factory_type.idleupkeepdata_set.all()
+                    for upkeep_cost in upkeep:
+                        amount = upkeep_cost.amount
+                        currency = upkeep_cost.currency
+                        account, created = Account.objects.get_or_create(user=lessee, currency=currency)
+                        account.credit_or_debit(-amount)
+
+                self.save()
+
+            except InsufficientFundsError:
+                self.delete()
 
 class FactoryCostData(models.Model):
     amount = models.PositiveIntegerField()
