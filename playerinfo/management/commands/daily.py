@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.management.base import BaseCommand
-from playerinfo.models import Factory, WorkDoneDay
+from playerinfo.models import Factory, Plot, WorkDoneDay
 
 class Command(BaseCommand):
     args = '[timestamp]'
@@ -21,5 +21,8 @@ class Command(BaseCommand):
 
         for factory in Factory.objects.all():
             factory.upkeep()
+
+        for plot in Plot.objects.all():
+            plot.upkeep()
 
         WorkDoneDay(day=the_date).save()

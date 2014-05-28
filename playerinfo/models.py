@@ -98,6 +98,15 @@ class Plot(models.Model):
     lessee = models.ForeignKey(User, null=True)
     days_left = models.PositiveIntegerField(default=0)
 
+    def upkeep(self):
+        if self.days_left > 0:
+            self.days_left -= 1
+
+            if self.days_left == 0:
+                self.lessee = None
+
+            self.save()
+
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
 
@@ -137,6 +146,10 @@ class Factory(models.Model):
 
     def upkeep(self):
         lessee = self.plot.lessee
+
+        # Time doesn't pass on unleased plots, somehow.
+        if lessee is None:
+            return
 
         if self.active:
             try:
