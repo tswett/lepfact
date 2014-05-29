@@ -1,3 +1,4 @@
+import django.contrib.auth.views
 from django.http import HttpResponse
 import django.shortcuts
 
@@ -48,6 +49,7 @@ def list_profiles(request):
         })
 
     context = {
+        'user': request.user,
         'profiles': profiles,
         'accounts': accounts,
         'plots': plots,
@@ -55,3 +57,6 @@ def list_profiles(request):
     }
 
     return django.shortcuts.render(request, 'playerinfo/index.html', context)
+
+def login(request):
+    return django.contrib.auth.views.login(request, template_name='playerinfo/login.html')

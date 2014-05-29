@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     # url(r'^nomic/', include('nomic.foo.urls')),
 
     url(r'^playerinfo/$', views.list_profiles, name=''),
+    url(r'^playerinfo/login/$', views.login),
 
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
