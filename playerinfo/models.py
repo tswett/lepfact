@@ -95,7 +95,7 @@ class Transaction(models.Model):
 
 class Plot(models.Model):
     """This is an in-game plot of land on which something can be built."""
-    lessee = models.ForeignKey(User, null=True)
+    lessee = models.ForeignKey(User, null=True, blank=True)
     days_left = models.PositiveIntegerField(default=0)
 
     def upkeep(self):
