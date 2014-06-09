@@ -21,6 +21,24 @@
 {% endfor %}
         </table>
 
+        <h1>Plot bids</h1>
+        <table>
+            <tr>
+                <th>Bidder</th>
+                <th>Daily rate</th>
+                <th>Currency</th>
+                <th>Days</th>
+            </tr>
+{% for bid in bids %}
+            <tr>
+                <td>{{ bid.bidder }}</td>
+                <td>{{ bid.daily_rate }}</td>
+                <td>{{ bid.currency.name }}</td>
+                <td>{{ bid.days }}</td>
+            </tr>
+{% endfor %}
+        </table>
+
         <h1>Players</h1>
         <table>
             <tr>

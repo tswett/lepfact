@@ -1,5 +1,6 @@
 import django.db
 from django.db import models
+from django.db.models import F
 
 from django.contrib.auth.models import User
 
@@ -32,6 +33,13 @@ class Currency(models.Model):
 
     def __unicode__(self):
         return "Currency '" + self.name + "'"
+
+class MoneyCurrency(models.Model):
+    """This is the currency which currently stands for money in the
+    game.  Don't make more than one of this.
+    """
+
+    currency = models.ForeignKey(Currency)
 
 class InsufficientFundsError(Exception):
     """This is an exception thrown to indicate that an operation has
@@ -98,6 +106,7 @@ class Plot(models.Model):
     lessee = models.ForeignKey(User, null=True, blank=True)
     days_left = models.PositiveIntegerField(default=0)
 
+    @django.db.transaction.atomic
     def upkeep(self):
         if self.days_left > 0:
             self.days_left -= 1
@@ -105,7 +114,31 @@ class Plot(models.Model):
             if self.days_left == 0:
                 self.lessee = None
 
-            self.save()
+        if self.days_left == 0:
+            money_currency = MoneyCurrency.objects.get().currency
+
+            bids = Bid.objects.filter(currency=money_currency).order_by('daily_rate')
+
+            if bids:
+                highest_bid = bids[0]
+                try:
+                    Account.objects.get_or_create(user=highest_bid.bidder, currency=money_currency)[0].credit_or_debit(-highest_bid.daily_rate * highest_bid.days)
+                except InsufficientFundsError:
+                    pass
+                else:
+                    self.lessee = highest_bid.bidder
+                    self.days_left = highest_bid.days
+                finally:
+                    highest_bid.delete()
+
+        self.save()
+
+class Bid(models.Model):
+    """This is a bid someone has placed to obtain a plot of land."""
+    bidder = models.ForeignKey(User)
+    daily_rate = models.BigIntegerField()
+    currency = models.ForeignKey(Currency)
+    days = models.PositiveIntegerField()
 
 class FactoryType(models.Model):
     name = models.CharField(max_length=32, unique=True)
