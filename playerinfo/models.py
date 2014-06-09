@@ -56,7 +56,7 @@ class Account(models.Model):
 
     def __unicode__(self):
         return ('Account of user "%s" in currency "%s"' %
-            self.user.username, str(self.currency))
+            (self.user.username, str(self.currency)))
 
     def credit_or_debit(self, amount, allow_negative=False, description=''):
         # amount is positive for a credit, negative for a debit.
