@@ -65,6 +65,7 @@ def login(request):
 
 def dashboard(request):
     context = {
+        'accounts': Account.objects.filter(user=request.user),
         'currencies': Currency.objects.all(),
         'users': User.objects.all(),
     }
