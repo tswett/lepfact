@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+    {% include "playerinfo/header.html" %}
     <form action="/playerinfo/login/?next=%2fplayerinfo%2f" method="post">
         {% csrf_token %}{{ form.as_p }}
         <input type="submit" value="Submit">
