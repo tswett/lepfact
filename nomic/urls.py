@@ -12,6 +12,7 @@ urlpatterns = patterns('',
 
     url(r'^playerinfo/$', views.list_profiles, name=''),
     url(r'^playerinfo/login/$', views.login),
+    url(r'^playerinfo/dashboard/$', views.dashboard),
 
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),

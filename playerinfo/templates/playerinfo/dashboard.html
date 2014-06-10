@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Holdings</h1>
+
+        <h1>Transfer currency</h1>
+        <form action="transfer/" method="post">
+            Transfer
+            <input type="number" value="0" name="amount">
+            <select name="currency">
+{% for currency in currencies %}
+                <option value="{{ currency.id }}">{{ currency.name }}</option>
+{% endfor %}
+            </select>
+            to
+            <select name="player">
+{% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+{% endfor %}
+            </select>
+            <input type="submit">
+        </form>
+
+        <h1>Current bids</h1>
+
+        <h1>Submit a bid</h1>
+        <form action="bid/" method="post">
+            Bid
+            <input type="number" value="0" name="rate">
+            per day for
+            <input type="number" value="0" name="days">
+            days for an arbitrary plot of land
+            <input type="submit">
+        </form>
+
+        <h1>Real estate</h1>
+    </body>
+</html>

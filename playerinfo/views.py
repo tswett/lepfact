@@ -1,9 +1,10 @@
+from django.contrib.auth.models import User
 import django.contrib.auth.views
 from django.http import HttpResponse
 import django.shortcuts
 
 from playerinfo.models import (
-    Account, UserProfile, Plot, Bid,
+    Account, UserProfile, Currency, Plot, Bid,
     FactoryType, BuildCostData, StartupCostData,
     IdleUpkeepData, ActiveUpkeepData, YieldData,
 )
@@ -61,3 +62,10 @@ def list_profiles(request):
 
 def login(request):
     return django.contrib.auth.views.login(request, template_name='playerinfo/login.html')
+
+def dashboard(request):
+    context = {
+        'currencies': Currency.objects.all(),
+        'users': User.objects.all(),
+    }
+    return django.shortcuts.render(request, 'playerinfo/dashboard.html', context)
