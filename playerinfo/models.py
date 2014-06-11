@@ -77,7 +77,11 @@ class Account(models.Model):
             self.balance += amount
             self.save()
             
-            Transaction(self, amount, description).save()
+            trans = Transaction()
+            trans.account = self
+            trans.amount = amount
+            trans.description = description
+            trans.save()
 
 class Transaction(models.Model):
     """This is a record of a credit or debit to an account."""
@@ -87,18 +91,12 @@ class Transaction(models.Model):
     date = models.DateTimeField(auto_now = True)
     description = models.CharField(max_length=128)
 
-    def __init__(self, account, amount, description):
-        super(Transaction, self).__init__()
-        self.account = account
-        self.amount = amount
-        self.description = description
-
     def __unicode__(self):
         return (
             'Transaction to credit %s units of currency "%s" to user "%s" at '
             '%s with description: %s' %
-            self.amount, str(self.account.currency),
-            self.account.user.username, self.date, self.description
+            (self.amount, str(self.account.currency),
+            self.account.user.username, self.date, self.description)
         )
 
 class Plot(models.Model):
@@ -117,7 +115,7 @@ class Plot(models.Model):
         if self.days_left == 0:
             money_currency = MoneyCurrency.objects.get().currency
 
-            bids = Bid.objects.filter(currency=money_currency).order_by('daily_rate')
+            bids = Bid.objects.filter(currency=money_currency).order_by('-daily_rate')
 
             if bids:
                 highest_bid = bids[0]

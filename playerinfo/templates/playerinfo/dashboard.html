@@ -2,7 +2,7 @@
 <html>
     <body>
         {% include "playerinfo/header.html" %}
-        <h1>Holdings</h1>
+        <h1>Your holdings</h1>
         <table>
             <tr>
                 <th>Currency</th>
@@ -18,6 +18,7 @@
 
         <h1>Transfer currency</h1>
         <form action="transfer/" method="post">
+            {% csrf_token %}
             Transfer
             <input type="number" value="0" name="amount">
             <select name="currency">
@@ -34,18 +35,102 @@
             <input type="submit">
         </form>
 
-        <h1>Current bids</h1>
+        <h1>Your current bids</h1>
+        <table>
+            <tr>
+                <th>Daily rate</th>
+                <th>Currency</th>
+                <th>Days</th>
+                <th></th>
+            </tr>
+{% for bid in bids %}
+            <tr>
+                <td>{{ bid.daily_rate }}</th>
+                <td>{{ bid.currency.name }}</th>
+                <td>{{ bid.days }}</td>
+                <td>
+                    <form action="cancelbid/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="bid" value="{{ bid.id }}">
+                        <input type="submit" value="Cancel">
+                    </form>
+                </td>
+            </tr>
+{% endfor %}
+        </table>
 
         <h1>Submit a bid</h1>
         <form action="bid/" method="post">
+            {% csrf_token %}
             Bid
             <input type="number" value="0" name="rate">
+            <b>{{ money }}</b>
             per day for
             <input type="number" value="0" name="days">
             days for an arbitrary plot of land
             <input type="submit">
         </form>
 
-        <h1>Real estate</h1>
+        <h1>Your real estate</h1>
+        <table>
+            <tr>
+                <th>Plot ID</th>
+                <th>Days remaining</th>
+                <th>Factory type</th>
+                <th>Factory is active</th>
+            </tr>
+{% for plot in plots %}
+            <tr>
+                <td>{{ plot.id }}</td>
+                <td>{{ plot.days_left }}</td>
+                <td>{{ plot.factory.factory_type.name }}</td>
+                <td>{{ plot.factory.active }}</td>
+                <td>
+{% if plot.factory %}
+{% if plot.factory.active %}
+                    <form action="shutdown/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plot" value="{{ plot.id }}">
+                        <input type="submit" value="Shut down">
+                    </form>
+{% else %}
+                    <form action="startup/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plot" value="{{ plot.id }}">
+                        <input type="submit" value="Start up">
+                    </form>
+{% endif %}
+{% endif %}
+                </td>
+                <td>
+{% if plot.factory %}
+                    <form action="demolish/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plot" value="{{ plot.id }}">
+                        <input type="submit" value="Demolish">
+                    </form>
+{% endif %}
+                </td>
+            </tr>
+{% endfor %}
+        </table>
+
+        <h1>Build something</h1>
+        <form action="build/" method="post">
+            {% csrf_token %}
+            Build a
+            <select name="type">
+{% for ftype in factory_types %}
+                <option value="{{ ftype.id }}">{{ ftype.name }}</option>
+{% endfor %}
+            </select>
+            on plot
+            <select name="plot">
+{% for plot in plots %}
+                <option value="{{ plot.id }}">{{ plot.id }}</option>
+{% endfor %}
+            </select>
+            <input type="submit">
+        </form>
     </body>
 </html>

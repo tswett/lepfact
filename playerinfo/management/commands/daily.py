@@ -1,4 +1,5 @@
 import datetime
+import subprocess
 
 from django.core.management.base import BaseCommand
 from playerinfo.models import Factory, Plot, WorkDoneDay
@@ -9,7 +10,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if args:
-            the_date = datetime.date.fromtimestamp(int(args[0]))
+            timestamp = int(subprocess.check_output(['date', '-d', args[0], '+%s']))
+            the_date = datetime.date.fromtimestamp(timestamp)
         else:
             the_date = datetime.date.today()
 
