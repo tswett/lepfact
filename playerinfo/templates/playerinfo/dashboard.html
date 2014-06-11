@@ -17,7 +17,7 @@
         </table>
 
         <h1>Transfer currency</h1>
-        <form action="transfer/" method="post">
+        <form action="{% url 'pi-transfer' %}" method="post">
             {% csrf_token %}
             Transfer
             <input type="number" value="0" name="amount">
@@ -49,7 +49,7 @@
                 <td>{{ bid.currency.name }}</th>
                 <td>{{ bid.days }}</td>
                 <td>
-                    <form action="cancelbid/" method="post">
+                    <form action="{% url 'pi-cancelbid' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="bid" value="{{ bid.id }}">
                         <input type="submit" value="Cancel">
@@ -60,7 +60,7 @@
         </table>
 
         <h1>Submit a bid</h1>
-        <form action="bid/" method="post">
+        <form action="{% url 'pi-bid' %}" method="post">
             {% csrf_token %}
             Bid
             <input type="number" value="0" name="rate">
@@ -88,13 +88,13 @@
                 <td>
 {% if plot.factory %}
 {% if plot.factory.active %}
-                    <form action="shutdown/" method="post">
+                    <form action="{% url 'pi-shutdown' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="plot" value="{{ plot.id }}">
                         <input type="submit" value="Shut down">
                     </form>
 {% else %}
-                    <form action="startup/" method="post">
+                    <form action="{% url 'pi-startup' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="plot" value="{{ plot.id }}">
                         <input type="submit" value="Start up">
@@ -104,7 +104,7 @@
                 </td>
                 <td>
 {% if plot.factory %}
-                    <form action="demolish/" method="post">
+                    <form action="{% url 'pi-demolish' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="plot" value="{{ plot.id }}">
                         <input type="submit" value="Demolish">
@@ -116,7 +116,7 @@
         </table>
 
         <h1>Build something</h1>
-        <form action="build/" method="post">
+        <form action="{% url 'pi-build' %}" method="post">
             {% csrf_token %}
             Build a
             <select name="type">
