@@ -66,13 +66,18 @@ def login(request):
     return django.contrib.auth.views.login(request, template_name='playerinfo/login.html')
 
 def dashboard(request):
+    if request.user.is_authenticated():
+        user = request.user
+    else:
+        user = None
+
     context = {
-        'accounts': Account.objects.filter(user=request.user),
-        'bids': Bid.objects.filter(bidder=request.user),
+        'accounts': Account.objects.filter(user=user),
+        'bids': Bid.objects.filter(bidder=user),
         'currencies': Currency.objects.all(),
         'factory_types': FactoryType.objects.all(),
         'money': MoneyCurrency.objects.get().currency.name,
-        'plots': Plot.objects.filter(lessee=request.user),
+        'plots': Plot.objects.filter(lessee=user),
         'users': User.objects.all(),
     }
     return django.shortcuts.render(request, 'playerinfo/dashboard.html', context)
