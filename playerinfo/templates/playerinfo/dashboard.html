@@ -2,40 +2,90 @@
 <html>
     <body>
         {% include "playerinfo/header.html" %}
-        <h1>Your holdings</h1>
-        <table>
-            <tr>
-                <th>Currency</th>
-                <th>Amount</th>
-            </tr>
-{% for account in accounts %}
-            <tr>
-                <td>{{ account.currency.name }}</td>
-                <td>{{ account.balance }}</td>
-            </tr>
-{% endfor %}
-        </table>
+        <h1>Your real estate</h1>
+        {% if plots %}
+        {% for plot in plots %}
+        <div style="border: 1px solid; margin: 5px; padding: 5px; display: table;">
+            <h2 style="margin-top: 0px;">{{ plot.factory.factory_type.name }}</h2>
+            <p>
+                There are <b>{{ plot.days_left }}</b> days remaining on this plot's lease.
+                {% if plot.factory %}
+                This factory is currently <b>{% if plot.factory.active %}working{% else %}shut down{% endif%}</b>.
+                {% if plot.factory.active %}
+                <form action="{% url 'pi-shutdown' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plot" value="{{ plot.id }}">
+                    <input type="submit" value="Shut down">
+                </form>
+                {% else %}
+                <form action="{% url 'pi-startup' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plot" value="{{ plot.id }}">
+                    <input type="submit" value="Start up">
+                </form>
+                {% endif %}
+                <form action="{% url 'pi-demolish' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plot" value="{{ plot.id }}">
+                    <input type="submit" value="Demolish">
+                </form>
+                {% endif %}
+            </p>
+            <p>
+                <dl>
+                    <dt>Cost to start this factory up:</dt>
+                    {% for cost in plot.factory.factory_type.startupcostdata_set.all %}
+                    <dd>{{ cost.amount }} {{ cost.currency.name }}</dd>
+                    {% endfor %}
+                    <dt>This factory's daily upkeep cost (while shut down):</dt>
+                    {% for cost in plot.factory.factory_type.idleupkeepdata_set.all %}
+                    <dd>{{ cost.amount }} {{ cost.currency.name }}</dd>
+                    {% endfor %}
+                    <dt>This factory's daily upkeep cost (while working):</dt>
+                    {% for cost in plot.factory.factory_type.activeupkeepdata_set.all %}
+                    <dd>{{ cost.amount }} {{ cost.currency.name }}</dd>
+                    {% endfor %}
+                    <dt>This factory's daily yield (while working):</dt>
+                    {% for cost in plot.factory.factory_type.yielddata_set.all %}
+                    <dd>{{ cost.amount }} {{ cost.currency.name }}</dd>
+                    {% endfor %}
+                </dl>
+            </p>
+            <p>This is plot number <b>{{ plot.id }}</b>.</p>
 
-        <h1>Transfer currency</h1>
-        <form action="{% url 'pi-transfer' %}" method="post">
+            <h3>Build something</h3>
+            <form action="{% url 'pi-build' %}" method="post">
+                {% csrf_token %}
+                Build a
+                <select name="type">
+                    {% for ftype in factory_types %}
+                    <option value="{{ ftype.id }}">{{ ftype.name }}</option>
+                    {% endfor %}
+                </select>
+                on this plot
+                <input type="hidden" name="plot" value="{{ plot.id }}">
+                <input type="submit">
+            </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>You don't currently have any land. To lease a plot of land, enter a bid below.</p>
+        {% endif %}
+
+        <h2>Submit a bid</h2>
+        <form action="{% url 'pi-bid' %}" method="post">
             {% csrf_token %}
-            Transfer
-            <input type="number" value="0" name="amount">
-            <select name="currency">
-{% for currency in currencies %}
-                <option value="{{ currency.id }}">{{ currency.name }}</option>
-{% endfor %}
-            </select>
-            to
-            <select name="player">
-{% for user in users %}
-                <option value="{{ user.id }}">{{ user.username }}</option>
-{% endfor %}
-            </select>
+            Bid
+            <input type="number" value="0" name="rate">
+            <b>{{ money }}</b>
+            per day for
+            <input type="number" value="0" name="days">
+            days for an arbitrary plot of land
             <input type="submit">
         </form>
 
-        <h1>Your current bids</h1>
+        <h3>Your current bids</h3>
+        {% if bids %}
         <table>
             <tr>
                 <th>Daily rate</th>
@@ -43,7 +93,7 @@
                 <th>Days</th>
                 <th></th>
             </tr>
-{% for bid in bids %}
+            {% for bid in bids %}
             <tr>
                 <td>{{ bid.daily_rate }}</th>
                 <td>{{ bid.currency.name }}</th>
@@ -56,81 +106,45 @@
                     </form>
                 </td>
             </tr>
-{% endfor %}
+            {% endfor %}
         </table>
+        {% else %}
+        <p>You haven't submitted any bids.</p>
+        {% endif %}
 
-        <h1>Submit a bid</h1>
-        <form action="{% url 'pi-bid' %}" method="post">
-            {% csrf_token %}
-            Bid
-            <input type="number" value="0" name="rate">
-            <b>{{ money }}</b>
-            per day for
-            <input type="number" value="0" name="days">
-            days for an arbitrary plot of land
-            <input type="submit">
-        </form>
-
-        <h1>Your real estate</h1>
+        <h1>Your holdings</h1>
         <table>
             <tr>
-                <th>Plot ID</th>
-                <th>Days remaining</th>
-                <th>Factory type</th>
-                <th>Factory is active</th>
+                <th>Currency</th>
+                <th>Amount</th>
             </tr>
-{% for plot in plots %}
+            {% for account in accounts %}
             <tr>
-                <td>{{ plot.id }}</td>
-                <td>{{ plot.days_left }}</td>
-                <td>{{ plot.factory.factory_type.name }}</td>
-                <td>{{ plot.factory.active }}</td>
-                <td>
-{% if plot.factory %}
-{% if plot.factory.active %}
-                    <form action="{% url 'pi-shutdown' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="plot" value="{{ plot.id }}">
-                        <input type="submit" value="Shut down">
-                    </form>
-{% else %}
-                    <form action="{% url 'pi-startup' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="plot" value="{{ plot.id }}">
-                        <input type="submit" value="Start up">
-                    </form>
-{% endif %}
-{% endif %}
-                </td>
-                <td>
-{% if plot.factory %}
-                    <form action="{% url 'pi-demolish' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="plot" value="{{ plot.id }}">
-                        <input type="submit" value="Demolish">
-                    </form>
-{% endif %}
-                </td>
+                <td>{{ account.currency.name }}</td>
+                <td>{{ account.balance }}</td>
             </tr>
-{% endfor %}
+            {% endfor %}
         </table>
+        <p>Want more stuff? Lease some land and build some factories!</p>
 
-        <h1>Build something</h1>
-        <form action="{% url 'pi-build' %}" method="post">
+        <h2>Transfer currency</h2>
+        <form action="{% url 'pi-transfer' %}" method="post">
             {% csrf_token %}
-            Build a
-            <select name="type">
-{% for ftype in factory_types %}
-                <option value="{{ ftype.id }}">{{ ftype.name }}</option>
-{% endfor %}
+            Transfer
+            <input type="number" value="0" name="amount">
+            <select name="currency">
+                {% for currency in currencies %}
+                <option value="{{ currency.id }}">{{ currency.name }}</option>
+                {% endfor %}
             </select>
-            on plot
-            <select name="plot">
-{% for plot in plots %}
-                <option value="{{ plot.id }}">{{ plot.id }}</option>
-{% endfor %}
+            to
+            <select name="player">
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
             </select>
             <input type="submit">
         </form>
+
     </body>
 </html>
